@@ -8,40 +8,39 @@ def sigmoid_func(x):
     value for a given input value"""
     return 1 / (1 + np.exp(-x))
 
+def gradient_for_each_sample(Xi, yi, W):
+    pred = sigmoid_func(Xi.dot(W.T))
+    error = pred - yi 
+    return Xi*error
+
 def gradient_func(X, y, W, learning_rate, epochs):
     # Initialize a list to store the loss value for each epoch
     loss_history = []
+    N = X.shape[1]
 
     """Loop over the desired number of epochs"""                        
     for epoch in np.arange(0, epochs):
-        # take the dot product between our features 'X'
-        # and the weight matrix 'X', then pass this value
-        # through the sigmoid activation function, there by
-        # giving us our predictions on the dataset
-        preds = sigmoid_func(X.dot(W))
 
-        # now that we have our predictions, we need to determine
-        # our 'error', which is the difference between our
-        # our predictions and the true values
-        error = preds - y 
+        preds = sigmoid_func(X.dot(W)) # Predict
 
-        # given our 'error', we can compute the total loss
-        # value as the sum of squared loss -- ideally, our
-        # loss should decrease as we continue training
-        loss = np.sum(error ** 2)
-        loss_history.append(loss)
+        error = preds - y              # Compute loss
+
+        loss = np.sum(error ** 2)      # Compute total loss for X
+        loss_history.append(loss)       
         print ("[INFO] epoch #{}, loss:{:.7f}".format(epoch+1, loss))
-        
-        # The gradient update is therefore the dot product
-        # between the transpose of 'X' and our error, scaled
-        # by the total number of data points in 'X'
-        gradient = X.T.dot(error) / X.shape[0]
+        rd_id = np.random.permutation(N) # shuffe data
+
+        """Loop over X with stochastic GD"""
+        for i in range(N):
+            true_id = rd_id[i]
+            gradient = gradient_for_each_sample(X[true_id], y[true_id], W )
+
         W += -learning_rate * gradient
     return W, loss_history
 
 # Construct the argument parse and parse the argument
 ap = argparse.ArgumentParser()
-ap.add_argument("-e", "--epochs", type=float, default=100,
+ap.add_argument("-e", "--epochs", type=float, default=10,
                 help="# of epochs")
 ap.add_argument("-a", "--alpha", type=float, default=0.01,
                 help="learning rate")
@@ -98,5 +97,8 @@ plt.plot(np.arange(0, args["epochs"]), loss_history)
 fig.suptitle("Training loss")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss")
+print (X)
+print (y)
 plt.show()
+
 
