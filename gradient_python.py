@@ -8,6 +8,13 @@ def sigmoid_func(x):
     value for a given input value"""
     return 1 / (1 + np.exp(-x))
 
+def loss(X, y, W):
+    preds = sigmoid_func(X.dot(W)) # Predict
+
+    error = preds - y              # Compute loss
+
+    return np.sum(error ** 2)      # Compute total loss for X
+
 def gradient_for_each_sample(Xi, yi, W):
     pred = sigmoid_func(Xi.dot(W.T))
     error = pred - yi 
@@ -16,26 +23,33 @@ def gradient_for_each_sample(Xi, yi, W):
 def gradient_func(X, y, W, learning_rate, epochs):
     # Initialize a list to store the loss value for each epoch
     loss_history = []
-    N = X.shape[1]
+    N = X.shape[0]
+    old_W = np.array(W)
+    print (old_W, W)
+    iter_check = 10
 
     """Loop over the desired number of epochs"""                        
     for epoch in np.arange(0, epochs):
 
-        preds = sigmoid_func(X.dot(W)) # Predict
-
-        error = preds - y              # Compute loss
-
-        loss = np.sum(error ** 2)      # Compute total loss for X
-        loss_history.append(loss)       
-        print ("[INFO] epoch #{}, loss:{:.7f}".format(epoch+1, loss))
+        print ("[INFO] epoch #{}, loss:{:.7f}".format(epoch+1, loss(X, y, W)))
         rd_id = np.random.permutation(N) # shuffe data
 
         """Loop over X with stochastic GD"""
+        count = 0
         for i in range(N):
+            loss_history.append(loss(X, y, W))       
+
+            count += 1
             true_id = rd_id[i]
             gradient = gradient_for_each_sample(X[true_id], y[true_id], W )
+            W += -learning_rate * gradient
 
-        W += -learning_rate * gradient
+            if count % iter_check == 0:
+                if np.linalg.norm(old_W - W) / len(W) < 1e-11:
+                    return W, loss_history
+            old_W = np.array(W)
+    # print ("old_W: {}, W: {}".format(old_W, W))
+
     return W, loss_history
 
 # Construct the argument parse and parse the argument
@@ -93,12 +107,11 @@ plt.plot(X, Y, "r-")
 
 # Construct a figure that plots the loss over time
 fig = plt.figure()
-plt.plot(np.arange(0, args["epochs"]), loss_history)
+plt.plot(range(len(loss_history)), loss_history)
 fig.suptitle("Training loss")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss")
-print (X)
-print (y)
+
 plt.show()
 
 
