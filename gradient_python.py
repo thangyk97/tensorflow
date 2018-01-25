@@ -20,6 +20,11 @@ def gradient_for_each_sample(Xi, yi, W):
     error = pred - yi 
     return Xi*error
 
+def gradient_for_mini_batch(X, y, W):
+    pred = sigmoid_func(X.dot(W.T))
+    error = pred - y 
+    return X.T.dot(error) / X.shape[0]
+
 def gradient_func(X, y, W, learning_rate, epochs):
     # Initialize a list to store the loss value for each epoch
     loss_history = []
@@ -27,28 +32,30 @@ def gradient_func(X, y, W, learning_rate, epochs):
     old_W = np.array(W)
     print (old_W, W)
     iter_check = 10
+    batch_size = 32
 
     """Loop over the desired number of epochs"""                        
     for epoch in np.arange(0, epochs):
 
         print ("[INFO] epoch #{}, loss:{:.7f}".format(epoch+1, loss(X, y, W)))
         rd_id = np.random.permutation(N) # shuffe data
-
+        X = X[rd_id]
+        y = y[rd_id]
         """Loop over X with stochastic GD"""
         count = 0
-        for i in range(N):
+        for i in range(0, N, batch_size):
             loss_history.append(loss(X, y, W))       
 
             count += 1
-            true_id = rd_id[i]
-            gradient = gradient_for_each_sample(X[true_id], y[true_id], W )
-            W += -learning_rate * gradient
+
+            W += -learning_rate * gradient_for_mini_batch(
+                X[i: i+batch_size], y[i: i+batch_size], W
+            )
 
             if count % iter_check == 0:
-                if np.linalg.norm(old_W - W) / len(W) < 1e-11:
+                if np.linalg.norm(old_W - W) / len(W) < 1e-3:
                     return W, loss_history
             old_W = np.array(W)
-    # print ("old_W: {}, W: {}".format(old_W, W))
 
     return W, loss_history
 
@@ -62,7 +69,7 @@ args = vars(ap.parse_args())
 
 # Generate a 2-class classification problem with 250 data
 # points, where each data point is a 2D feature vector
-(X, y) = make_blobs(n_samples=250, n_features=2, centers=2,
+(X, y) = make_blobs(n_samples=25000, n_features=2, centers=2,
                     cluster_std=1.05, random_state=20)
 
 #Insert a column of 1's as the first entry in the feature
@@ -80,7 +87,7 @@ W, loss_history = gradient_func(X, y, W, args["alpha"], args["epochs"])
 
 """To demonstrate how to use our weght matrix as a classifier,
 let's look over our a sample of training examples"""
-for i in np.random.choice(250, 10):
+for i in np.random.choice(25000, 10):
     # Compute the prediction by taking the dot product of
     # the current feature vector with the weight matrix W,
     # then passing ti through the sigmoid activation func
