@@ -21,6 +21,8 @@ def gradient_for_each_sample(Xi, yi, W):
     return Xi*error
 
 def gradient_for_mini_batch(X, y, W):
+
+
     pred = sigmoid_func(X.dot(W.T))
     error = pred - y 
     return X.T.dot(error) / X.shape[0]
@@ -53,7 +55,7 @@ def gradient_func(X, y, W, learning_rate, epochs):
             )
 
             if count % iter_check == 0:
-                if np.linalg.norm(old_W - W) / len(W) < 1e-3:
+                if np.linalg.norm(old_W - W) / len(W) < 1e-9:
                     return W, loss_history
             old_W = np.array(W)
 
