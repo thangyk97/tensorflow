@@ -1,14 +1,11 @@
-import tensorflow as tf 
+import numpy as np 
+import random
+a = np.array([1,2,3,4])
+b = np.array([1,2,3,4])
+print (a, b)
 
-# Build computational graph
-a = tf.placeholder(tf.int16)
-b = a * 2
+id_shuffle = np.random.permutation(len(a))
+a = a[id_shuffle]
+b = b[id_shuffle]
 
-
-# Create session and run the graph
-with tf.Session() as sess:
-    
-    print sess.run(b, feed_dict={a:[1,2,3]})
-
-# Close session
-sess.close()
+print (a, b)
