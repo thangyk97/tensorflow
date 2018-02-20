@@ -86,9 +86,9 @@ with tf.Session() as sess:
             )
 
             avg_cost += c / total_batch
-        print "Epoch:", (epoch+1), "cost =", "{: .5f}".format(avg_cost)
+        print ("Epoch:", (epoch+1), "cost =", "{: .5f}".format(avg_cost))
 
-    print "\nTraining complete!"
+    print ("\nTraining complete!")
 
     # Find predictions on val set
 

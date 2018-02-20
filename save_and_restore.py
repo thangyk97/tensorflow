@@ -1,54 +1,42 @@
-# import tensorflow as tf 
-
-# # Create some variables.
-# v1 = tf.get_variable(
-#     "v1",
-#     shape=[3],
-#     initializer=tf.zeros_initializer,
-# )
-# v2 = tf.get_variable(
-#     "v2",
-#     shape=[5],
-#     initializer=tf.zeros_initializer,
-# )
-
-# inc_v1 = v1.assign(v1 + 1)
-# dec_v2 = v2.assign(v2 - 1)
-
-# # Add an op to initialze the variables.
-# init_op = tf.global_variables_initializer()
-
-# # Add ops to save and restore all the variables.
-# saver = tf.train.Saver()
-
-# with tf.Session() as sess:
-#     sess.run(init_op)  # lauch the model.
-
-#     # Do some work. 
-#     inc_v1.op.run()
-#     dec_v2.op.run()
-
-#     # Save the variables to disk.
-#     save_path = saver.save(sess, "/tmp/model.ckpt")
-#     print ("Model saved in path: %s" % save_path)
 
 
-import tensorflow as tf 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
-tf.reset_default_graph()
+import numpy as np
+import tensorflow as tf
 
-# Create some variables.
-v1 = tf.get_variable("v1", shape=[3])
-v2 = tf.get_variable("v2", shape=[5])
+tf.logging.set_verbosity(tf.logging.INFO)
 
-# Add ops to save and restore all the variables.
-saver = tf.train.Saver()
 
-with tf.Session() as sess:
-    # Restore variables from disk.
-    saver.restore(sess, "/tmp/model.ckpt")
-    print("Model restored")
 
-    # Check the values of the variables
-    print ("v1: %s" % v1.eval())
-    print ("v2: %s" % v2.eval())
+def main(unused_argv):
+  # Load training and eval data
+  mnist = tf.contrib.learn.datasets.load_dataset("mnist")
+
+  eval_data = mnist.test.images  # Returns np.array
+
+
+
+  """softmax_tensor"""
+  sess = tf.Session()
+
+  
+
+  saver = tf.train.import_meta_graph(
+      '/home/thangkt/git/tensorflow/mnist_convnet_model/model.ckpt-20001.meta'
+  )
+  saver.restore(sess,tf.train.latest_checkpoint('/home/thangkt/git/tensorflow/mnist_convnet_model'))
+
+  graph = tf.get_default_graph()
+
+
+  op_to_restore = graph.get_tensor_by_name("softmax_tensor:0")
+  
+  print (sess.run(op_to_restore))
+
+
+
+if __name__ == "__main__":
+  tf.app.run()

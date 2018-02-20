@@ -111,6 +111,12 @@ def cnn_model_fn(features, labels, mode):
   eval_metric_ops = {
       "accuracy": tf.metrics.accuracy(
           labels=labels, predictions=predictions["classes"])}
+
+
+
+
+
+          
   return tf.estimator.EstimatorSpec(
       mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
@@ -123,27 +129,31 @@ def main(unused_argv):
   eval_data = mnist.test.images  # Returns np.array
   eval_labels = np.asarray(mnist.test.labels, dtype=np.int32)
 
+  print (eval_data.shape)
+  print (eval_labels.shape)
+  print (type(eval_data))
+  print (type(eval_labels))
   # Create the Estimator
   mnist_classifier = tf.estimator.Estimator(
-      model_dir="/tmp/mnist_convnet_model")
+      model_fn=cnn_model_fn, model_dir="/home/thangkt/git/tensorflow/mnist_convnet_model")
 
   # Set up logging for predictions
   # Log the values in the "Softmax" tensor with label "probabilities"
-  tensors_to_log = {"probabilities": "softmax_tensor"}
-  logging_hook = tf.train.LoggingTensorHook(
-      tensors=tensors_to_log, every_n_iter=50)
+#   tensors_to_log = {"probabilities": "softmax_tensor"}
+#   logging_hook = tf.train.LoggingTensorHook(
+#       tensors=tensors_to_log, every_n_iter=50)
 
-  # Train the model
-  # train_input_fn = tf.estimator.inputs.numpy_input_fn(
-  #     x={"x": train_data},
-  #     y=train_labels,
-  #     batch_size=100,
-  #     num_epochs=None,
-  #     shuffle=True)
-  # mnist_classifier.train(
-  #     input_fn=train_input_fn,
-  #     steps=20000,
-  #     hooks=[logging_hook])
+#   # Train the model
+#   train_input_fn = tf.estimator.inputs.numpy_input_fn(
+#       x={"x": train_data},
+#       y=train_labels,
+#       batch_size=100,
+#       num_epochs=None,
+#       shuffle=True)
+#   mnist_classifier.train(
+#       input_fn=train_input_fn,
+#       steps=20000,
+#       hooks=[logging_hook])
 
   # Evaluate the model and print results
   eval_input_fn = tf.estimator.inputs.numpy_input_fn(
